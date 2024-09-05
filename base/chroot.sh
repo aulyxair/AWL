@@ -328,29 +328,15 @@ sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=${GRUBCMD}|g" /etc/default/g
 # Checking for CPU model
 echo -e "${BBlue}Installing CPU ucode...${NC}"
 # Use grep to check if the string 'Intel' is present in the CPU info
-if [[ $CPU_VENDOR_ID =~ "GenuineIntel" ]]; then
-    pacman -S intel-ucode --noconfirm
-elif
-    # If the string 'Intel' is not present, check if the string 'AMD' is present
-    [[ $CPU_VENDOR_ID =~ "AuthenticAMD" ]]; then
-    pacman -S amd-ucode --noconfirm
-else
-    # If neither 'Intel' nor 'AMD' is present, then it is an unknown CPU
-    echo "This is an unknown CPU."
-fi
+pacman -S intel-ucode --noconfirm
 
 # Checking for NVIDIA GPUs
-if lspci | grep -e VGA -e 3D | grep -i nvidia > /dev/null; then
-    NVIDIA_CARD=true
-    echo -e "${BBlue}Found Nvidia GPU...${NC}"
-else
-    NVIDIA_CARD=false
-fi
+NVIDIA_CARD=true
+echo -e "${BBlue}Found Nvidia GPU...${NC}"
 
-if [[ "$NVIDIA_CARD" = true ]]; then
-    echo -e "${BBlue}Installing NVIDIA drivers...${NC}"
-    touch /etc/modprobe.d/blacklist-nouveau.conf
-    echo "blacklist nouveau" >> /etc/modprobe.d/blacklist-nouveau.conf
+echo -e "${BBlue}Installing NVIDIA drivers...${NC}"
+touch /etc/modprobe.d/blacklist-nouveau.conf
+echo "blacklist nouveau" >> /etc/modprobe.d/blacklist-nouveau.conf
 
     # Detect NVIDIA GPU model
 gpu_model=$(lspci | grep -i 'vga\|3d\|2d' | grep -i nvidia | cut -d ':' -f3)
