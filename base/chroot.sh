@@ -346,7 +346,7 @@ echo "Running Kernel: $kernel"
 
 # Function to install packages
 echo "Installing packages: $*"
-sudo pacman -S --noconfirm nvidia nvidia-dkms nvidia-utils lib32-nvidia-utils
+pacman -S --noconfirm nvidia nvidia-dkms nvidia-utils lib32-nvidia-utils
 echo -e "${BBlue}Adjusting /etc/mkinitcpio.conf for Nvidia...${NC}"
 sed -i "s|^MODULES=.*|MODULES=(nvidia nvidia_drm nvidia_modeset)|g" /etc/mkinitcpio.conf
 # Add legacy package if needed
