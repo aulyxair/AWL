@@ -1,3 +1,6 @@
+#!/bin/bash
+
+
 echo -e "${BBlue}Setting up GRUB...${NC}"
 mkdir /boot/grub
 grub-mkconfig -o /boot/grub/grub.cfg &&\
