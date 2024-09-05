@@ -312,7 +312,7 @@ chown -R $USERNAME:$USERNAME /home/$USERNAME
 echo -e "${BBlue}Setting default ACLs on home directory${NC}"
 setfacl -d -m u::rwx,g::---,o::--- ~
 
-mount -v /dev/$DISK"p2" /efi
+mount -v /dev/$DISK"2" /efi
 
 echo -e "${BBlue}Adding GRUB package...${NC}"
 pacman -S grub efibootmgr os-prober --noconfirm
