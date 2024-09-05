@@ -57,41 +57,37 @@ LUKS_KEYS='/etc/luksKeys' # Where you will store the root partition key
 timedatectl set-ntp true
 
 # Partition the disk
-echo -e "${BBlue}Preparing disk $DISK for UEFI and Encryption...${NC}"
-sgdisk -og $DISK
-
-# Create a 1MiB BIOS boot partition
-echo -e "${BBlue}Creating a 1MiB BIOS boot partition...${NC}"
-sgdisk -n 1:2048:4095 -t 1:ef02 -c 1:"BIOS boot Partition" $DISK
-
-# Create a UEFI partition
-echo -e "${BBlue}Creating a UEFI partition...${NC}"
-sgdisk -n 2:4096:1130495 -t 2:ef00 -c 2:"EFI" $DISK
-
-# Create a LUKS partition
-echo -e "${BBlue}Creating a LUKS partition...${NC}"
-sgdisk -n 3:1130496:$(sgdisk -E $DISK) -t 3:8309 -c 3:"Linux LUKS" $DISK
+parted $DISK
+mklabel gpt
+mkpart boot 1mib 2mib
+mkpart esp 3mib 515mib
+mkpart crypt 516mib -1mib
+set 1 boot on
+set 2 esp on
+unit mib
+print
+sleep 5
 
 # Create the LUKS container
 echo -e "${BBlue}Creating the LUKS container...${NC}"
 #read -ps 'Enter a password for the LUKS container: ' LUKS_PASS
 
 # Encrypts with the best key size.
-cryptsetup -q --cipher aes-xts-plain64 --key-size 512 --hash sha512 --iter-time 3000 --use-random  luksFormat --type luks1 $DISK"p3" &&\
+cryptsetup luksFormat --pbkdf pbkdf2 $DISK"3" &&\
 
 # Opening LUKS container to test
 echo -e "${BBlue}Opening the LUKS container to test password...${NC}"
-cryptsetup -v luksOpen $DISK"p3" $CRYPT_NAME &&\
+cryptsetup -v luksOpen $DISK"3" $CRYPT_NAME &&\
 cryptsetup -v luksClose $CRYPT_NAME
 
 # create a LUKS key of size 2048 and save it as boot.key
 echo -e "${BBlue}Creating the LUKS key for $CRYPT_NAME...${NC}"
 dd if=/dev/urandom of=./boot.key bs=2048 count=1 &&\
-cryptsetup -v luksAddKey -i 1 $DISK"p3" ./boot.key &&\
+cryptsetup -v luksAddKey -i 1 $DISK"3" ./boot.key &&\
 
 # unlock LUKS container with the boot.key file
 echo -e "${BBlue}Testing the LUKS keys for $CRYPT_NAME...${NC}"
-cryptsetup -v luksOpen $DISK"p3" $CRYPT_NAME --key-file ./boot.key &&\
+cryptsetup -v luksOpen $DISK"3" $CRYPT_NAME --key-file ./boot.key &&\
 echo -e "\n"
 
 # Create the LVM physical volume, volume group and logical volume
@@ -118,11 +114,11 @@ mkdir --verbose -p /mnt/tmp &&\
 
 # Mount efi
 echo -e "${BBlue}Preparing the EFI partition...${NC}"
-mkfs.vfat -F32 $DISK"p2"
+mkfs.vfat -F32 $DISK"2"
 sleep 2
 mkdir --verbose /mnt/efi
 sleep 1
-mount --verbose $DISK"p2" /mnt/efi
+mount --verbose $DISK"2" /mnt/efi
 
 # Update the keyring for the packages
 echo -e "${BBlue}Updating Arch Keyrings...${NC}" 
