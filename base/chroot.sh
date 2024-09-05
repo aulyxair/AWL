@@ -29,7 +29,7 @@ kernel=$(uname -r)
 RULES_URL="https://raw.githubusercontent.com/bfuzzy1/auditd-attack/master/auditd-attack/auditd-attack.rules"
 # Specify the path to the local auditd rules file
 LOCAL_RULES_FILE="/etc/audit/rules.d/auditd-attack.rules"
-SSH_PORT=22 # Change to the desired port.
+SSH_PORT=36369 # Change to the desired port.
 
 pacman-key --init
 pacman-key --populate archlinux
@@ -56,23 +56,6 @@ echo -e "${BBlue}Setting hostname...${NC}"
 echo "$HOSTNAME" > /etc/hostname &&
 echo "127.0.0.1 localhost localhost.localdomain $HOSTNAME.localdomain $HOSTNAME" > /etc/hosts
 
-# Create a new resolv.conf file with the following settings:
-echo "nameserver 1.1.1.1" > /etc/resolv.conf
-echo "nameserver 8.8.8.8" >> /etc/resolv.conf  
-
-# Configure DNS to prevent leaks
-echo "Configuring DNS to prevent DNS leaks..."
-echo "[Resolve]" > /etc/systemd/resolved.conf
-echo "DNS=8.8.8.8 8.8.4.4" >> /etc/systemd/resolved.conf
-echo "FallbackDNS=1.1.1.1 9.9.9.9" >> /etc/systemd/resolved.conf
-echo "DNSSEC=yes" >> /etc/systemd/resolved.conf # Change to DNSSEC=allow-downgrade if needed
-systemctl enable systemd-resolved.service
-
-# Hardening hosts.allow and hosts.deny
-echo "sshd : ALL : ALLOW" > /etc/hosts.allow
-echo "ALL: LOCAL, 127.0.0.1" >> /etc/hosts.allow
-echo "ALL: ALL" > /etc/hosts.deny
-
 echo -e "${BBlue}Configuring IPtables...${NC}"
 # Set default policies
 iptables -P INPUT DROP
@@ -86,7 +69,7 @@ iptables -A OUTPUT -o lo -j ACCEPT
 # Allow established and related incoming connections
 iptables -A INPUT -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
-# Allow SSH on custom port (39458) with rate limiting
+# Allow SSH on custom port (36369) with rate limiting
 iptables -A INPUT -p tcp --dpt $SSH_PORT -m conntrack --ctstate NEW -m limit --limit 2/min --limit-burst 5 -j ACCEPT
 
 # Drop any other new connections to the custom SSH port beyond the rate limit
