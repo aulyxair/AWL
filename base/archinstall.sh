@@ -158,6 +158,13 @@ cp ./chroot.sh /mnt &&\
 chmod +x /mnt/chroot.sh &&\
 shred -u ./chroot.sh
 
+sed -i "s|^DISK=.*|DISK='${DISK}'|g" ./chrootend.sh
+sed -i "s|^USERNAME=.*|USERNAME='${USERNAME}'|g" ./chrootend.sh
+sed -i "s|^HOSTNAME=.*|HOSTNAME='${HOSTNAME}'|g" ./chrootend.sh
+cp ./chrootend.sh /mnt &&\
+chmod +x /mnt/chrootend.sh &&\
+shred -u ./chrootend.sh
+
 # Chroot into new system and configure it 
 echo -e "${BBlue}Chrooting into new system and configuring it...${NC}"
-arch-chroot /mnt /bin/bash ./chroot.sh
+arch-chroot /mnt 
