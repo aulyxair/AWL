@@ -68,24 +68,24 @@ cryptsetup luksFormat --type luks2 --cipher=aes-xts-plain64 $DISK"2" &&\
 
 # Create the LVM physical volume, volume group and logical volume
 echo -e "${BBlue}Creating LVM logical volumes on $LVM_NAME...${NC}"
-pvcreate --verbose /dev/mapper/$CRYPT_NAME &&\
-vgcreate --verbose $LVM_NAME /dev/mapper/$CRYPT_NAME &&\
-lvcreate --verbose -L $ROOT_SIZE $LVM_NAME -n root &&\
-lvcreate --verbose -L $SWAP_SIZE $LVM_NAME -n swap &&\
-lvcreate --verbose -l 100%FREE $LVM_NAME -n home &&\
-lvreduce -L -256M $LVM_NAME/home
+pvcreate /dev/mapper/cryptlvm &&\
+vgcreate --verbose lvm_arch /dev/mapper/cryptlvm &&\
+lvcreate --verbose -L $ROOT_SIZE lvm_arch -n root &&\
+lvcreate --verbose -L $SWAP_SIZE lvm_arch -n swap &&\
+lvcreate --verbose -l 100%FREE lvm_arch -n home &&\
+lvreduce -L -256M lvm_arch/home
 
 # Format the partitions 
 echo -e "${BBlue}Formating filesystems...${NC}"
-mkfs.ext4 /dev/mapper/$LVM_NAME-root &&\
-mkfs.ext4 /dev/mapper/$LVM_NAME-home &&\
-mkswap /dev/mapper/$LVM_NAME-swap &&\
-swapon /dev/mapper/$LVM_NAME-swap &&\
+mkfs.ext4 /dev/lvm_arch/root
+mkfs.ext4 /dev/lvm_arch/home
+mkswap /dev/lvm_arch/swap
+swapon /dev/lvm_arch/swap &&\
 
 # Mount filesystem
 echo -e "${BBlue}Mounting filesystems...${NC}"
-mount --verbose /dev/mapper/$LVM_NAME-root /mnt &&\
-mount --mkdir --verbose /dev/mapper/$LVM_NAME-home /mnt/home &&\
+mount /dev/lvm_arch/root /mnt
+mount --mkdir /dev/lvm_arch/home /mnt/home
 
 # Mount efi
 echo -e "${BBlue}Preparing the EFI partition...${NC}"
@@ -110,16 +110,6 @@ echo -ne "\n\n\n" | pacstrap -i /mnt base base-devel archlinux-keyring linux lin
 # Generate fstab file 
 echo -e "${BBlue}Generating fstab file...${NC}" 
 genfstab -pU /mnt >> /mnt/etc/fstab &&\
-
-echo -e "${BBlue}Adding proc to fstab and harndening it...${NC}" 
-echo "proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0" >> /mnt/etc/fstab &&\
-mkdir /mnt/etc/systemd/system/systemd-logind.service.d &&\
-touch /mnt/etc/systemd/system/systemd-logind.service.d/hidepid.conf &&\
-echo "[Service]" >> /mnt/etc/systemd/system/systemd-logind.service.d/hidepid.conf &&\
-echo "SupplementaryGroups=proc" >> /mnt/etc/systemd/system/systemd-logind.service.d/hidepid.conf &&\
-
-echo -e "${BBlue}Reloading fstab...${NC}"
-systemctl daemon-reload
 
 # Preparing the chroot script to be executed
 echo -e "${BBlue}Preparing the chroot script to be executed...${NC}"
