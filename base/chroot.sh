@@ -21,7 +21,7 @@ LVM_NAME='lvm_arch'
 USERNAME='<user_name_goes_here>'
 HOSTNAME='<hostname_goes_here>'
 LUKS_KEYS='/etc/luksKeys/boot.key' # Where you will store the root partition key
-UUID=$(cryptsetup luksDump "$DISK""3" | grep UUID | awk '{print $2}')
+UUID=$(cryptsetup luksDump "$DISK""2" | grep UUID | awk '{print $2}')
 CPU_VENDOR_ID=$(lscpu | grep Vendor | awk '{print $3}')
 kernel=$(uname -r)
 
@@ -190,6 +190,7 @@ else
 fi
 
 systemctl enable --now auditd
+sleep 1
 
 # Enable and configure necessary services
 echo -e "${BBlue}Enabling NetworkManager...${NC}"
@@ -268,35 +269,17 @@ chown -R $USERNAME:$USERNAME /home/$USERNAME
 echo -e "${BBlue}Setting default ACLs on home directory${NC}"
 setfacl -d -m u::rwx,g::---,o::--- ~
 
-mount -v /dev/$DISK"2" /efi
 
-echo -e "${BBlue}Adding GRUB package...${NC}"
-pacman -S grub efibootmgr os-prober --noconfirm
 
 # GRUB hardening setup and encryption
 echo -e "${BBlue}Adjusting /etc/mkinitcpio.conf for encryption...${NC}"
-sed -i "s|^HOOKS=.*|HOOKS=(base udev autodetect microcode modconf kms keyboard keymap consolefont block encrypt lvm2 filesystems fsck)|g" /etc/mkinitcpio.conf
-sed -i "s|^FILES=.*|FILES=(${LUKS_KEYS})|g" /etc/mkinitcpio.conf
-mkinitcpio -p linux &&\
+sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)|g" /etc/mkinitcpio.conf
 
-echo -e "${BBlue}Adjusting etc/default/grub for encryption...${NC}"
-sed -i '/GRUB_ENABLE_CRYPTODISK/s/^#//g' /etc/default/grub
+mkdir /etc/cmdline.d
+touch /etc/cmdline.d/root.conf
+echo "\"rd.luks.name=$UUID=$LVM_NAME root=/dev/mapper/$LVM_NAME-root"" >> /etc/cmdline.d/root.conf
 
-echo -e "${BBlue}Hardening GRUB and Kernel boot options...${NC}"
 
-# GRUBSEC Hardening explanation:
-# slab_nomerge: This disables slab merging, which significantly increases the difficulty of heap exploitation
-# init_on_alloc=1 Init_on_free=1: enables zeroing of memory during allocation and free time, which can help mitigate use-after-free vulnerabilities and erase sensitive information in memory.
-# page_alloc.shuffle=1: Randomises page allocator freelists, improving security by making page allocations less predictable. This also improves performance.
-# pti=on: Enables Kernel Page Table Isolation, which mitigates Meltdown and prevents some KASLR bypasses.
-# randomize_kstack_offset=on: Randomises the kernel stack offset on each syscall, which makes attacks that rely on deterministic kernel stack layout significantly more difficult
-# vsyscall=none: Disables vsyscalls, as they are obsolete and have been replaced with vDSO. vsyscalls are also at fixed addresses in memory, making them a potential target for ROP attacks.
-# lockdown=confidentiality: Eliminate many methods that user space code could abuse to escalate to kernel privileges and extract sensitive information. 
-# lockdown=confidentiality - This was removed because it locked nvidia and vmware module so they couldn't be loaded.
-GRUBSEC="\"slab_nomerge init_on_alloc=1 init_on_free=1 page_alloc.shuffle=1 pti=on randomize_kstack_offset=on vsyscall=none quiet loglevel=3\""
-GRUBCMD="\"cryptdevice=UUID=$UUID:$LVM_NAME root=/dev/mapper/$LVM_NAME-root cryptkey=rootfs:$LUKS_KEYS\""
-sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=${GRUBSEC}|g" /etc/default/grub
-sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=${GRUBCMD}|g" /etc/default/grub
 
 
 # Checking for NVIDIA GPUs
@@ -306,18 +289,11 @@ echo -e "${BBlue}Found Nvidia GPU...${NC}"
 echo -e "${BBlue}Installing NVIDIA drivers...${NC}"
 touch /etc/modprobe.d/blacklist-nouveau.conf
 echo "blacklist nouveau" >> /etc/modprobe.d/blacklist-nouveau.conf
-echo -e "${BBlue}Adjusting /etc/default/grub for Nvidia...${NC}"
-sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)\)"/\1 nvidia_drm.modeset=1"/' /etc/default/grub
 sed -i "s|^MODULES=.*|MODULES=(nvidia nvidia_drm nvidia_modeset)|g" /etc/mkinitcpio.conf
-# Add legacy package if needed
-mkinitcpio -p linux
 
 
-echo -e "${BBlue}Setting up GRUB...${NC}"
-mkdir /boot/grub
-grub-mkconfig -o /boot/grub/grub.cfg &&\
-grub-install --target=x86_64-efi --bootloader-id=GRUB --efi-directory=/efi --recheck &&\
-chmod 600 $LUKS_KEYS
+
+
 
 # Creating a cool /etc/issue
 echo -e "${BBlue}Creating Banner (/etc/issue).${NC}"
@@ -372,9 +348,5 @@ EOF
 
 
 
-echo -e "${BBlue}Setting root password...${NC}"
-passwd &&\
 
-echo -e "${BBlue}Installation completed! You can reboot the system now.${NC}"
-rm /chroot.sh
 exit
