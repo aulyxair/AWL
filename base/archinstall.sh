@@ -101,7 +101,7 @@ pacman -Sy archlinux-keyring --noconfirm
 
 # Install Arch Linux base system. Add or remove packages as you wish.
 echo -e "${BBlue}Installing Arch Linux base system...${NC}" 
-echo -ne "\n\n\n" | pacstrap -i /mnt base base-devel archlinux-keyring linux linux-headers \
+echo -ne "\n\n\n" | pacstrap -i /mnt base base-devel archlinux-keyring linux linux-headers nvidia nvidia-dkms nvidia-utils intel-ucode\
                     linux-firmware zsh lvm2 mtools networkmanager iwd dhcpcd wget curl git \
                     openssh neovim unzip unrar p7zip zip unarj arj cabextract xz pbzip2 pixz \
                     alsa-firmware alsa-tools alsa-utils fuse3 ntfs-3g zsh-completions net-tools sbctl \
@@ -130,12 +130,6 @@ cp ./chroot.sh /mnt &&\
 chmod +x /mnt/chroot.sh &&\
 shred -u ./chroot.sh
 
-sed -i "s|^DISK=.*|DISK='${DISK}'|g" ./chrootend.sh
-sed -i "s|^USERNAME=.*|USERNAME='${USERNAME}'|g" ./chrootend.sh
-sed -i "s|^HOSTNAME=.*|HOSTNAME='${HOSTNAME}'|g" ./chrootend.sh
-cp ./chrootend.sh /mnt &&\
-chmod +x /mnt/chrootend.sh &&\
-shred -u ./chrootend.sh
 
 # Chroot into new system and configure it 
 echo -e "${BBlue}Chrooting into new system and configuring it...${NC}"
