@@ -277,7 +277,7 @@ sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboar
 
 mkdir /etc/cmdline.d
 touch /etc/cmdline.d/root.conf
-echo "\"rd.luks.name=$UUID=$LVM_NAME root=/dev/mapper/$LVM_NAME-root"" >> /etc/cmdline.d/root.conf
+blkid | grep -o "sda2.*LUKS" >> /etc/cmdline.d/root.conf
 
 
 
