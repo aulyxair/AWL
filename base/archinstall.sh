@@ -56,30 +56,15 @@ LUKS_KEYS='/etc/luksKeys' # Where you will store the root partition key
 # Setting time correctly before installation
 timedatectl set-ntp true
 
-# Partition the disk
-#parted -s $DISK mklabel gpt mkpart boot 1mib 2mib mkpart esp 3mib 515mib mkpart crypt 516mib -1mib set 1 boot on set 2 esp on unit mib
+# Partition the disk 1G EFI + REST 
 
 # Create the LUKS container
 echo -e "${BBlue}Creating the LUKS container...${NC}"
 #read -ps 'Enter a password for the LUKS container: ' LUKS_PASS
 
 # Encrypts with the best key size.
-cryptsetup luksFormat --pbkdf pbkdf2 $DISK"3" &&\
+cryptsetup luksFormat --type luks2 --cipher=aes-xts-plain64 $DISK"2" &&\
 
-# Opening LUKS container to test
-echo -e "${BBlue}Opening the LUKS container to test password...${NC}"
-cryptsetup -v luksOpen $DISK"3" $CRYPT_NAME &&\
-cryptsetup -v luksClose $CRYPT_NAME
-
-# create a LUKS key of size 2048 and save it as boot.key
-echo -e "${BBlue}Creating the LUKS key for $CRYPT_NAME...${NC}"
-dd if=/dev/urandom of=./boot.key bs=2048 count=1 &&\
-cryptsetup -v luksAddKey -i 1 $DISK"3" ./boot.key &&\
-
-# unlock LUKS container with the boot.key file
-echo -e "${BBlue}Testing the LUKS keys for $CRYPT_NAME...${NC}"
-cryptsetup -v luksOpen $DISK"3" $CRYPT_NAME --key-file ./boot.key &&\
-echo -e "\n"
 
 # Create the LVM physical volume, volume group and logical volume
 echo -e "${BBlue}Creating LVM logical volumes on $LVM_NAME...${NC}"
@@ -88,6 +73,7 @@ vgcreate --verbose $LVM_NAME /dev/mapper/$CRYPT_NAME &&\
 lvcreate --verbose -L $ROOT_SIZE $LVM_NAME -n root &&\
 lvcreate --verbose -L $SWAP_SIZE $LVM_NAME -n swap &&\
 lvcreate --verbose -l 100%FREE $LVM_NAME -n home &&\
+lvreduce -L -256M $LVM_NAME/home
 
 # Format the partitions 
 echo -e "${BBlue}Formating filesystems...${NC}"
@@ -99,17 +85,15 @@ swapon /dev/mapper/$LVM_NAME-swap &&\
 # Mount filesystem
 echo -e "${BBlue}Mounting filesystems...${NC}"
 mount --verbose /dev/mapper/$LVM_NAME-root /mnt &&\
-mkdir --verbose /mnt/home &&\
-mount --verbose /dev/mapper/$LVM_NAME-home /mnt/home &&\
-mkdir --verbose -p /mnt/tmp &&\
+mount --mkdir --verbose /dev/mapper/$LVM_NAME-home /mnt/home &&\
 
 # Mount efi
 echo -e "${BBlue}Preparing the EFI partition...${NC}"
-mkfs.vfat -F32 $DISK"2"
+mkfs.fat -F32 $DISK"1"
 sleep 2
 mkdir --verbose /mnt/efi
 sleep 1
-mount --verbose $DISK"2" /mnt/efi
+mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 $DISK"1" /mnt/efi
 
 # Update the keyring for the packages
 echo -e "${BBlue}Updating Arch Keyrings...${NC}" 
@@ -126,18 +110,6 @@ echo -ne "\n\n\n" | pacstrap -i /mnt base base-devel archlinux-keyring linux lin
 # Generate fstab file 
 echo -e "${BBlue}Generating fstab file...${NC}" 
 genfstab -pU /mnt >> /mnt/etc/fstab &&\
-
-echo -e "${BBlue}Copying the $CRYPT_NAME key to $LUKS_KEYS ...${NC}" 
-mkdir --verbose /mnt$LUKS_KEYS
-cp ./boot.key /mnt$LUKS_KEYS/boot.key
-
-# Securely delete the key file from the local file system.
-echo -e "${BBlue}Securely erasing the local key file...${NC}" 
-shred -u ./boot.key
-
-# Add an entry to fstab so the new mountpoint will be mounted on boot
-echo -e "${BBlue}Adding tmpfs to fstab...${NC}" 
-echo "tmpfs /tmp tmpfs rw,nosuid,nodev,noexec,relatime,size=2G 0 0" >> /mnt/etc/fstab &&\
 
 echo -e "${BBlue}Adding proc to fstab and harndening it...${NC}" 
 echo "proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0" >> /mnt/etc/fstab &&\
