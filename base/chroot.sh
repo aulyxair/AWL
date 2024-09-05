@@ -15,13 +15,13 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # The below values will be changed by ArchInstall.sh
-DISK='<your_target_disk>'
+DISK='/dev/sda'
 CRYPT_NAME='crypt_lvm'
 LVM_NAME='lvm_arch'
-USERNAME='<user_name_goes_here>'
-HOSTNAME='<hostname_goes_here>'
+USERNAME='grimc0r'
+HOSTNAME='Arch'
 LUKS_KEYS='/etc/luksKeys/boot.key' # Where you will store the root partition key
-UUID=$(cryptsetup luksDump "$DISK""p3" | grep UUID | awk '{print $2}')
+UUID=$(cryptsetup luksDump "/dev/sda3" | grep UUID | awk '{print $2}')
 CPU_VENDOR_ID=$(lscpu | grep Vendor | awk '{print $3}')
 kernel=$(uname -r)
 
