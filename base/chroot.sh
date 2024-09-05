@@ -354,7 +354,7 @@ mkinitcpio -p linux
 
 if [[ "$NVIDIA_CARD" = true ]]; then
     echo -e "${BBlue}Adjusting /etc/default/grub for Nvidia...${NC}"
-    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=".*"/& nvidia_drm.modeset=1/' /etc/default/grub
+    sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)\)"/\1 nvidia_drm.modeset=1"/' /etc/default/grub
 fi
 
 exit
