@@ -57,16 +57,7 @@ LUKS_KEYS='/etc/luksKeys' # Where you will store the root partition key
 timedatectl set-ntp true
 
 # Partition the disk
-parted $DISK
-mklabel gpt
-mkpart boot 1mib 2mib
-mkpart esp 3mib 515mib
-mkpart crypt 516mib -1mib
-set 1 boot on
-set 2 esp on
-unit mib
-print
-sleep 5
+parted -s $DISK mklabel gpt mkpart boot 1mib 2mib mkpart esp 3mib 515mib mkpart crypt 516mib -1mib set 1 boot on set 2 esp on unit mib
 
 # Create the LUKS container
 echo -e "${BBlue}Creating the LUKS container...${NC}"
