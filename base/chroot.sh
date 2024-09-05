@@ -83,47 +83,36 @@ iptables-save > /etc/iptables/rules.v4
 
 
 echo -e "${BBlue}Installing and configuring rng-tools...${NC}"
-pacman -S rng-tools
+pacman -S rng-tools --noconfirm
 systemctl enable rngd
 
 echo -e "${BBlue}Installing and configuring haveged...${NC}"
-pacman -S haveged
+pacman -S haveged --noconfirm
 systemctl enable haveged.service
 
 # ClamAV anti-virus
 echo -e "${BBlue}Installing and configuring clamav...${NC}"
-pacman -S clamav
+pacman -S clamav --noconfirm
 
 # Rootkit Hunter
 echo -e "${BBlue}Installing and configuring rkhunter...${NC}"
-pacman -S rkhunter
+pacman -S rkhunter --noconfirm
 rkhunter --update
 rkhunter --propupd
 
 echo -e "${BBlue}Installing and configuring arpwatch...${NC}"
-pacman -s arpwatch
+pacman -s arpwatch --noconfirm
 
 echo -e "${BBlue}Configuring usbguard...${NC}"
-pacman -S usbguard
+pacman -S usbguard --noconfirm
 
 sh -c 'usbguard generate-policy > /etc/usbguard/rules.conf'
 systemctl enable usbguard.service
 
 # Hardening /etc/login.defs
-echo -e "${BBlue}Changing the value of UMASK from 022 to 027...${NC}"
-sed -i 's/^UMASK[[:space:]]\+022/UMASK\t\t027/' /etc/login.defs
 
 echo -e "${BBlue}Configuring Password Hashing Rounds...${NC}"
 sed -i '/#SHA_CRYPT_MIN_ROUNDS 5000/s/^#//;/#SHA_CRYPT_MAX_ROUNDS 5000/s/^#//' /etc/login.defs
-
-echo -e "${BBlue}Increasing Fail Delay to 5 Seconds...${NC}"
-sed -i 's/^FAIL_DELAY[[:space:]]\+3/FAIL_DELAY\t\t5/' /etc/login.defs
-
-echo -e "${BBlue}Lowering Login Retries to 3...${NC}"
-sed -i 's/^LOGIN_RETRIES[[:space:]]\+5/LOGIN_RETRIES\t\t3/' /etc/login.defs
-
-echo -e "${BBlue}Reducing Login Timeout to 30 Seconds...${NC}"
-sed -i 's/^LOGIN_TIMEOUT[[:space:]]\+60/LOGIN_TIMEOUT\t\t30/' /etc/login.defs
 
 echo -e "${BBlue}Ensuring the Strongest Encryption Method is Used...${NC}"
 sed -i 's/^ENCRYPT_METHOD[[:space:]]\+.*$/ENCRYPT_METHOD YESCRYPT/' /etc/login.defs
@@ -131,24 +120,8 @@ sed -i 's/^ENCRYPT_METHOD[[:space:]]\+.*$/ENCRYPT_METHOD YESCRYPT/' /etc/login.d
 echo -e "${BBlue}Increasing YESCRYPT Cost Factor...${NC}"
 sed -i 's/^#YESCRYPT_COST_FACTOR[[:space:]]\+.*$/YESCRYPT_COST_FACTOR 7/' /etc/login.defs
 
-echo -e "${BBlue}Setting Maximum Members Per Group...${NC}"
-sed -i 's/^#MAX_MEMBERS_PER_GROUP[[:space:]]\+0/MAX_MEMBERS_PER_GROUP\t100/' /etc/login.defs
-
 echo -e "${BBlue}Setting HMAC Crypto Algorithm to SHA512...${NC}"
 sed -i 's/^#HMAC_CRYPTO_ALGO[[:space:]]\+.*$/HMAC_CRYPTO_ALGO SHA512/' /etc/login.defs
-
-echo -e "${BBlue}Setting password expiring dates...${NC}"
-sed -i '/^PASS_MAX_DAYS/c\PASS_MAX_DAYS 730' /etc/login.defs # modify here the amount of MAX days
-sed -i '/^PASS_MIN_DAYS/c\PASS_MIN_DAYS 2' /etc/login.defs
-
-# Logging Failed Login Attempts
-echo -e "${BBlue}Configuring PAM to Log Failed Attempts...${NC}"
-echo "auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900" >> /etc/pam.d/common-auth
-
-# More umasking
-echo -e "${BBlue}Setting additional UMASK 027s...${NC}"
-echo "umask 027" | sudo tee -a /etc/profile
-echo "umask 027" | sudo tee -a /etc/bash.bashrc
 
 echo -e "${BBlue}Disabling unwanted protocols...${NC}"
 # Disable unwanted protocols
@@ -162,30 +135,30 @@ echo "* hard core 0" >> /etc/security/limits.conf
 
 # Monitoring critical files
 echo -e "${BBlue}Installing Aide to Monitor Changes to Critical and Sensitive Files...${NC}"
-pacman -Sy aide
+pacman -Sy aide --noconfirm
 aide --init
 mv /var/lib/aide/aide.db.new.gz /var/lib/aide/aide.db.gz
 
 # Using NTP for better reliability
 echo -e "${BBlue}Using NTP Daemon or NTP Client to Prevent Time Issues...${NC}"
-pacman -Sy chrony
-pacman -Sy ntp
+pacman -Sy chrony --noconfirm
+pacman -Sy ntp --noconfirm
 systemctl enable --now chronyd
 systemctl enable --now ntpd
 
 # Process monitoring tool
 echo -e "${BBlue}Enabling Process Accounting...${NC}"
-pacman -Sy acct
+pacman -Sy acct --noconfirm
 systemctl enable --now psacct
 
 # Sysstem monitoring tool
 echo -e "${BBlue}Enabling sysstat to Collect Accounting...${NC}"
-pacman -Sy sysstat
+pacman -Sy sysstat --noconfirm
 systemctl enable --now sysstat
 
 # System auditing tool
 echo -e "${BBlue}Enabling auditd to Collect Audit Information...${NC}"
-pacman -Sy audit
+pacman -Sy audit --noconfirm
 
 # Check if wget is installed
 if ! command -v wget &> /dev/null; then
@@ -325,10 +298,6 @@ GRUBCMD="\"cryptdevice=UUID=$UUID:$LVM_NAME root=/dev/mapper/$LVM_NAME-root cryp
 sed -i "s|^GRUB_CMDLINE_LINUX_DEFAULT=.*|GRUB_CMDLINE_LINUX_DEFAULT=${GRUBSEC}|g" /etc/default/grub
 sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=${GRUBCMD}|g" /etc/default/grub
 
-# Checking for CPU model
-echo -e "${BBlue}Installing CPU ucode...${NC}"
-# Use grep to check if the string 'Intel' is present in the CPU info
-pacman -S intel-ucode --noconfirm
 
 # Checking for NVIDIA GPUs
 NVIDIA_CARD=true
@@ -337,24 +306,12 @@ echo -e "${BBlue}Found Nvidia GPU...${NC}"
 echo -e "${BBlue}Installing NVIDIA drivers...${NC}"
 touch /etc/modprobe.d/blacklist-nouveau.conf
 echo "blacklist nouveau" >> /etc/modprobe.d/blacklist-nouveau.conf
-
-    # Detect NVIDIA GPU model
-gpu_model=$(lspci | grep -i 'vga\|3d\|2d' | grep -i nvidia | cut -d ':' -f3)
-
-echo "Detected GPU: $gpu_model"
-echo "Running Kernel: $kernel"
-
-# Function to install packages
-echo "Installing packages: $*"
-pacman -S --noconfirm nvidia nvidia-dkms nvidia-utils lib32-nvidia-utils
-echo -e "${BBlue}Adjusting /etc/mkinitcpio.conf for Nvidia...${NC}"
+echo -e "${BBlue}Adjusting /etc/default/grub for Nvidia...${NC}"
+sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)\)"/\1 nvidia_drm.modeset=1"/' /etc/default/grub
 sed -i "s|^MODULES=.*|MODULES=(nvidia nvidia_drm nvidia_modeset)|g" /etc/mkinitcpio.conf
 # Add legacy package if needed
 mkinitcpio -p linux
 
-if [[ "$NVIDIA_CARD" = true ]]; then
-    echo -e "${BBlue}Adjusting /etc/default/grub for Nvidia...${NC}"
-    sed -i 's/\(GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)\)"/\1 nvidia_drm.modeset=1"/' /etc/default/grub
-fi
+
 
 exit
