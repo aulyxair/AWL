@@ -269,7 +269,7 @@ setfacl -d -m u::rwx,g::---,o::--- ~
 
 # GRUB hardening setup and encryption
 echo -e "${BBlue}Adjusting /etc/mkinitcpio.conf for encryption...${NC}"
-sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboard sd-vconsole block sd-encrypt lvm2 filesystems fsck)|g" /etc/mkinitcpio.conf
+sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboard block sd-encrypt lvm2 filesystems fsck)|g" /etc/mkinitcpio.conf
 
 mkdir /etc/cmdline.d
 touch /etc/cmdline.d/root.conf
