@@ -10,6 +10,7 @@ I tried to gather all the best things from them and modify so that it works as i
 
 ***This implementation forces user to use a PIN to allow TPM to load the key,*** 
 ***so that it is not vulnerable to cold boot attacks.*** 
+
 Remember that physical brute force can be very effective to make you reveal your PIN.
 
 
