@@ -56,7 +56,7 @@ LUKS_KEYS='/etc/luksKeys' # Where you will store the root partition key
 # Setting time correctly before installation
 timedatectl set-ntp true
 
-# Partition the disk 1G EFI + REST 
+# BEFORE: Partition the disk 1G EFI + REST 
 
 # Create the LUKS container
 echo -e "${BBlue}Creating the LUKS container...${NC}"
