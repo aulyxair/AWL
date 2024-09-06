@@ -9,8 +9,7 @@ big thanks for their work, the links are below.
 
 My goal was to gather all the best things from them and to improve some outdated solutions.
 
-***This implementation forces user to use a PIN to allow TPM to load the key,*** 
-***so that it is not vulnerable to cold boot attacks.*** 
+***This implementation forces user to use a PIN to allow TPM to load the key.*** 
 
 
 ### Installation
