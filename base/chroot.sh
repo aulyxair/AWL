@@ -347,6 +347,38 @@ Arch Linux \r (\l)
 EOF
 
 
+echo -e "${BBlue}Setting permission on config files...${NC}"
+
+chmod 0700 /boot
+chmod 644 /etc/passwd
+chown root:root /etc/passwd
+chmod 644 /etc/group
+chown root:root /etc/group
+chmod 600 /etc/shadow
+chown root:root /etc/shadow
+chmod 600 /etc/gshadow
+chown root:root /etc/gshadow
+chown root:root /etc/ssh/sshd_config
+chmod 600 /etc/ssh/sshd_config
+chown root:root /etc/fstab
+chown root:root /etc/issue
+chmod 644 /etc/issue
+chown root:root /boot/grub/grub.cfg
+chmod og-rwx /boot/grub/grub.cfg
+chown root:root /etc/sudoers.d/
+chmod 750 /etc/sudoers.d
+chown -c root:root /etc/sudoers
+chmod -c 0440 /etc/sudoers
+chmod 02750 /bin/ping 
+chmod 02750 /usr/bin/w 
+chmod 02750 /usr/bin/who
+chmod 02750 /usr/bin/whereis
+chmod 0600 /etc/login.defs
+chown root:root /etc/issue
+chmod 644 /etc/issue
+
+echo -e "${BBlue}Setting root password...${NC}"
+passwd &&\
 
 
 exit
