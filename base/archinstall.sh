@@ -63,9 +63,9 @@ echo -e "${BBlue}Creating the LUKS container...${NC}"
 #read -ps 'Enter a password for the LUKS container: ' LUKS_PASS
 
 # Encrypts with the best key size.
-cryptsetup luksFormat --type luks2 --cipher=aes-xts-plain64 $DISK"2" &&\
+cryptsetup luksFormat --type luks2 $DISK"2" &&\
 
-cryptsetup luksopen /dev/sda2 cryptlvm
+cryptsetup luksOpen /dev/sda2 cryptlvm
 
 # Create the LVM physical volume, volume group and logical volume
 echo -e "${BBlue}Creating LVM logical volumes on $LVM_NAME...${NC}"
