@@ -4,7 +4,7 @@ Wallpaper: [https://www.reddit.com/user/alienpirate5/](https://www.reddit.com/us
 
 This is a working guide on how to install Arch Linux with improved security which utilizes 
 LUKS2 encrypted partition and how to set up Secure Boot and enroll TPM2. 
-It is based on work of @schm1d and @joelmathewthomas, big thanks for their awesome guides,
+It is based on guides of @schm1d and @joelmathewthomas, big thanks for their work,
 the links are below.
 I tried to gather all the best things from them and modify so that it works as it should.
 
