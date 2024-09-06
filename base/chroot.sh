@@ -46,10 +46,6 @@ locale-gen &&
 echo 'LANG=en_US.UTF-8' > /etc/locale.conf &&
 export LANG=en_US.UTF-8
 
-echo -e "${BBlue}Setting up console keymap and fonts...${NC}"
-echo 'KEYMAP=de_CH-latin1' > /etc/vconsole.conf &&
-echo 'FONT=lat9w-16' >> /etc/vconsole.conf &&
-echo 'FONT_MAP=8859-1_to_uni' >> /etc/vconsole.conf
 
 # Set hostname
 echo -e "${BBlue}Setting hostname...${NC}"
@@ -277,7 +273,10 @@ sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboar
 
 mkdir /etc/cmdline.d
 touch /etc/cmdline.d/root.conf
+echo "rd.luks.name=" > /etc/cmdline.d/root.conf
 blkid | grep -o "sda2.*LUKS" >> /etc/cmdline.d/root.conf
+echo "=cryptlvm root=/dev/lvm_arch/root" >> /etc/cmdline.d/root.conf
+
 
 
 
@@ -288,6 +287,7 @@ echo -e "${BBlue}Found Nvidia GPU...${NC}"
 
 echo -e "${BBlue}Installing NVIDIA drivers...${NC}"
 touch /etc/modprobe.d/blacklist-nouveau.conf
+
 echo "blacklist nouveau" >> /etc/modprobe.d/blacklist-nouveau.conf
 sed -i "s|^MODULES=.*|MODULES=(nvidia nvidia_drm nvidia_modeset)|g" /etc/mkinitcpio.conf
 
