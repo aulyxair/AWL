@@ -11,10 +11,6 @@ I tried to gather all the best things from them and modify so that it works as i
 ***This implementation forces user to use a PIN to allow TPM to load the key,*** 
 ***so that it is not vulnerable to cold boot attacks.*** 
 
-Remember that physical brute force can be very effective to make you reveal your PIN.
-
-
-
 
 ### Installation
 First downaload Arch ISO [here](https://archlinux.org/download/)
@@ -46,5 +42,5 @@ To run the base scripts on your target machine, all you need to do is:
 3. Then run **archinstall.sh** like so: `./archinstall.sh`
 
 
-[here](https://github.com/schm1d/AwesomeArchLinux/)
-[here](https://github.com/joelmathewthomas/archinstall-luks2-lvm2-secureboot-tpm2)
+[AwesomeArchLinux by @schm1d](https://github.com/schm1d/AwesomeArchLinux/)
+[archinstall-luks2-lvm2-secureboot-tpm2 by @joelmathewthomas](https://github.com/joelmathewthomas/archinstall-luks2-lvm2-secureboot-tpm2)
