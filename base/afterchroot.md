@@ -1,3 +1,5 @@
+Open /etc/cmdline.d/root.conf and make it look like rd.luks.name=device-UUID=cryptlvm root=/dev/MyVolGroup/root
+
 Next, modify `/etc/mkinitcpio.d/linux.preset`, as follows, with the appropriate mount point of the EFI system partition: 
 
 Here is a working example linux.preset for the linux kernel and the Arch splash screen. 
@@ -32,9 +34,6 @@ mkdir -p /efi/EFI/Linux
 mkinitcpio -p linux
 ```
 
-```
-passwd
-```
 
 Install `systemd-boot` with:
 
@@ -42,7 +41,7 @@ Install `systemd-boot` with:
 bootctl install
 ```
 
-Reboot into `UEFI`
+## Reboot into `UEFI`
 
 Now reboot into `UEFI` and put secure boot into **SETUP MODE**. Refer to your motherboard manufaturer's guide on how to do that.
 
@@ -141,7 +140,7 @@ System:
   Measured UKI: yes
   Boot into FW: supported
 ```
-Enrolling the TPM
+## Enrolling the TPM
 
 Make sure Secure Boot is active and in user mode when binding to PCR 7, otherwise, unauthorized boot devices could unlock the encrypted volume.
 The state of PCR 7 can change if firmware certificates change, which can risk locking the user out. This can be implicitly done by fwupd or explicitly by rotating Secure Boot keys.
