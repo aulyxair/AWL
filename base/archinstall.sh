@@ -124,4 +124,4 @@ shred -u ./chroot.sh
 
 # Chroot into new system and configure it 
 echo -e "${BBlue}Chrooting into new system and configuring it...${NC}"
-arch-chroot /mnt 
+arch-chroot /mnt /bin/bash ./chroot.sh
