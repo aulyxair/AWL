@@ -1,4 +1,4 @@
-Open /etc/cmdline.d/root.conf and make it look like rd.luks.name=device-UUID=cryptlvm root=/dev/MyVolGroup/root
+In arch-chroot open /etc/cmdline.d/root.conf and make it look like rd.luks.name=device-UUID=cryptlvm root=/dev/MyVolGroup/root
 
 Next, modify `/etc/mkinitcpio.d/linux.preset`, as follows, with the appropriate mount point of the EFI system partition: 
 
