@@ -92,8 +92,6 @@ mount --mkdir /dev/lvm_arch/home /mnt/home
 echo -e "${BBlue}Preparing the EFI partition...${NC}"
 mkfs.fat -F32 $DISK"1"
 sleep 2
-mkdir --verbose /mnt/efi
-sleep 1
 mount --mkdir -o uid=0,gid=0,fmask=0077,dmask=0077 $DISK"1" /mnt/efi
 
 # Update the keyring for the packages
