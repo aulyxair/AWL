@@ -112,6 +112,17 @@ echo -ne "\n\n\n" | pacstrap -i /mnt base base-devel archlinux-keyring linux lin
 echo -e "${BBlue}Generating fstab file...${NC}" 
 genfstab -pU /mnt >> /mnt/etc/fstab &&\
 
+
+echo -e "${BBlue}Adding proc to fstab and harndening it...${NC}" 
+echo "proc /proc proc nosuid,nodev,noexec,hidepid=2,gid=proc 0 0" >> /mnt/etc/fstab &&\
+mkdir /mnt/etc/systemd/system/systemd-logind.service.d &&\
+touch /mnt/etc/systemd/system/systemd-logind.service.d/hidepid.conf &&\
+echo "[Service]" >> /mnt/etc/systemd/system/systemd-logind.service.d/hidepid.conf &&\
+echo "SupplementaryGroups=proc" >> /mnt/etc/systemd/system/systemd-logind.service.d/hidepid.conf &&\
+
+echo -e "${BBlue}Reloading fstab...${NC}"
+systemctl daemon-reload
+
 # Preparing the chroot script to be executed
 echo -e "${BBlue}Preparing the chroot script to be executed...${NC}"
 sed -i "s|^DISK=.*|DISK='${DISK}'|g" ./chroot.sh
