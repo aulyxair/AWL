@@ -52,6 +52,11 @@ echo -e "${BBlue}Setting hostname...${NC}"
 echo "$HOSTNAME" > /etc/hostname &&
 echo "127.0.0.1 localhost localhost.localdomain $HOSTNAME.localdomain $HOSTNAME" > /etc/hosts
 
+# Hardening hosts.allow and hosts.deny
+echo "sshd : ALL : ALLOW" > /etc/hosts.allow
+echo "ALL: LOCAL, 127.0.0.1" >> /etc/hosts.allow
+echo "ALL: ALL" > /etc/hosts.deny
+
 echo -e "${BBlue}Configuring IPtables...${NC}"
 # Set default policies
 iptables -P INPUT DROP
@@ -125,6 +130,10 @@ echo "install dccp /bin/true" >> /etc/modprobe.d/disable-protocols.conf
 echo "install sctp /bin/true" >> /etc/modprobe.d/disable-protocols.conf
 echo "install rds /bin/true" >> /etc/modprobe.d/disable-protocols.conf
 echo "install tipc /bin/true" >> /etc/modprobe.d/disable-protocols.conf
+
+# Logging Failed Login Attempts
+echo -e "${BBlue}Configuring PAM to Log Failed Attempts...${NC}"
+echo "auth required pam_tally2.so onerr=fail audit silent deny=5 unlock_time=900" >> /etc/pam.d/common-auth
 
 # Disabling core dump. Comment if you need it.
 echo "* hard core 0" >> /etc/security/limits.conf
