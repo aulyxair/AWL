@@ -65,7 +65,7 @@ echo -e "${BBlue}Creating the LUKS container...${NC}"
 # Encrypts with the best key size.
 cryptsetup luksFormat --type luks2 $DISK"2" &&\
 
-cryptsetup luksOpen /dev/sda2 cryptlvm
+cryptsetup luksOpen $DISK"2" cryptlvm
 
 # Create the LVM physical volume, volume group and logical volume
 echo -e "${BBlue}Creating LVM logical volumes on $LVM_NAME...${NC}"
