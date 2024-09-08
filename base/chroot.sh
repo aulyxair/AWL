@@ -283,7 +283,7 @@ sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboar
 mkdir /etc/cmdline.d
 touch /etc/cmdline.d/root.conf
 echo "rd.luks.name=" > /etc/cmdline.d/root.conf
-blkid | grep -o "$DISK""2.*LUKS" >> /etc/cmdline.d/root.conf
+blkid | grep -o $DISK"2.*LUKS" >> /etc/cmdline.d/root.conf
 echo "=cryptlvm root=/dev/lvm_arch/root" >> /etc/cmdline.d/root.conf
 
 
