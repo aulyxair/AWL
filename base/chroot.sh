@@ -276,7 +276,7 @@ setfacl -d -m u::rwx,g::---,o::--- ~
 
 
 
-# GRUB hardening setup and encryption
+#  hardening setup and encryption
 echo -e "${BBlue}Adjusting /etc/mkinitcpio.conf for encryption...${NC}"
 sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboard block sd-encrypt lvm2 filesystems fsck)|g" /etc/mkinitcpio.conf
 
@@ -372,8 +372,7 @@ chmod 600 /etc/ssh/sshd_config
 chown root:root /etc/fstab
 chown root:root /etc/issue
 chmod 644 /etc/issue
-chown root:root /boot/grub/grub.cfg
-chmod og-rwx /boot/grub/grub.cfg
+
 chown root:root /etc/sudoers.d/
 chmod 750 /etc/sudoers.d
 chown -c root:root /etc/sudoers
