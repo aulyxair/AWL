@@ -15,7 +15,7 @@ if [ "$(id -u)" -ne 0 ]; then
 fi
 
 # The below values will be changed by ArchInstall.sh
-DISK='/dev/sda'
+DISK='<disk>'
 CRYPT_NAME='crypt_lvm'
 LVM_NAME='lvm_arch'
 USERNAME='<user_name_goes_here>'
@@ -283,7 +283,7 @@ sed -i "s|^HOOKS=.*|HOOKS=(base systemd autodetect microcode modconf kms keyboar
 mkdir /etc/cmdline.d
 touch /etc/cmdline.d/root.conf
 echo "rd.luks.name=" > /etc/cmdline.d/root.conf
-blkid | grep -o "sda2.*LUKS" >> /etc/cmdline.d/root.conf
+blkid | grep -o "$DISK""2.*LUKS" >> /etc/cmdline.d/root.conf
 echo "=cryptlvm root=/dev/lvm_arch/root" >> /etc/cmdline.d/root.conf
 
 
